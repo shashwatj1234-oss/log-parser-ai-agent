@@ -48,3 +48,26 @@ npm run dev
 
 ## 🔑 Environment Variables
 PERPLEXITY_API_KEY : your_api_key_here
+
+
+----------
+
+## 📘 Filtering and LLM Analysis Approach
+1. Parsing and Normalization
+- ParserUtil processes NDJSON logs line by line, ignoring invalid records.
+- Each entry is normalized with fields: clusterUid, containerId, containerName, log, namespace, podName, stream, timestamp.
+- An internal _idx index tracks log order.
+
+2. Filtering
+- LogFilter extracts keywords from the prompt, lowercased and without stopwords.
+- Logs are scanned across containerName, podName, namespace, log.
+- Keyword frequency builds a _score; only matches > 0 kept.
+- Logs are sorted by score and top N returned.
+
+3. LLM Analysis
+- Filtered logs and prompt are passed to Perplexity Sonar LLM.
+- The model produces:
+   - summary of incident
+   - relevant_log_indices of key entries
+   - reason for selection
+- Response includes filtered logs, highlights, LLM output, token usage, and cost.
